@@ -1,5 +1,7 @@
 import { DataSource } from "typeorm";
 import { User } from "./models/user";
+import { Activity } from "./models/activity";
+import { UserActivity } from "./models/userActivity";
 import "./env";
 
 export const AppDataSource = new DataSource({
@@ -11,7 +13,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: process.env.DB_SYNCHRONIZE === "true",
   logging: process.env.DB_LOGGING === "true",
-  entities: [User],
+  entities: [User, Activity, UserActivity],
   subscribers: [],
   migrations: [],
 });

@@ -10,6 +10,7 @@ import morgan from "morgan";
 import cors from "cors";
 import redisClient from "./redis/redisClient";
 import profileRouter from "./modules/profile/controller";
+import activityRouter from "./modules/activity/controller";
 
 declare global {
   namespace Express {
@@ -46,6 +47,7 @@ export const bootstrap = async (app: Express) => {
       app.use("/uploads", express.static("uploads"));
       app.use("/api/auth", authRouter);
       app.use("/api/profile", profileRouter);
+      app.use("/api/activities", activityRouter);
 
       app.use(globalErrorHandling);
     })
