@@ -2,15 +2,15 @@ import express, { Express } from "express";
 import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import "reflect-metadata";
-import { AppDataSource } from "./data-source";
 import { User } from "./models/user";
 import { globalErrorHandling } from "./utils/errorHandler/errorHandler";
 import authRouter from "./modules/auth/controller";
 import morgan from "morgan";
 import cors from "cors";
-import redisClient from "./redis/redisClient";
 import profileRouter from "./modules/profile/controller";
 import activityRouter from "./modules/activity/controller";
+import { DataSource } from "typeorm";
+import { RedisClientType } from "redis";
 
 declare global {
   namespace Express {
@@ -26,7 +26,11 @@ const limiter = rateLimit({
   message: "Too many requests, please try again later.",
 });
 
-export const bootstrap = async (app: Express) => {
+export const bootstrap = async (
+  app: Express,
+  redisClient: RedisClientType<any, any, any>,
+  AppDataSource: DataSource
+) => {
   await redisClient.connect();
   await AppDataSource.initialize()
     .then(async () => {
