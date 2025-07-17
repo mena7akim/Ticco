@@ -81,11 +81,6 @@ const createUserActivity: RequestHandler = asyncHandler(
     const { name, color, icon } = req.body;
     const userId = req.user.id;
 
-    if (!name || !color || !icon) {
-      next(new RequestError("Name, color, and icon are required", 400));
-      return;
-    }
-
     const userActivity = await UserActivityRepository.save({
       userId,
       name,
@@ -110,11 +105,6 @@ const updateUserActivity: RequestHandler = asyncHandler(
     const { id } = req.params;
     const { name, color, icon } = req.body;
     const userId = req.user.id;
-
-    if (!name || !color || !icon) {
-      next(new RequestError("Name, color, and icon are required", 400));
-      return;
-    }
 
     const userActivity = await UserActivityRepository.findOne({
       where: { id: parseInt(id), userId },

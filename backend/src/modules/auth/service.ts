@@ -14,10 +14,7 @@ const requestLogin: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { email } = req.body;
     console.log("Requesting login for email:", email);
-    if (!email) {
-      next(new RequestError("Email is required", 400));
-      return;
-    }
+
     const user = await UserRepository.findOne({
       where: { email },
     });
@@ -46,10 +43,7 @@ const requestLogin: RequestHandler = asyncHandler(
 const login: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const { email, otp } = req.body;
-    if (!email || !otp) {
-      next(new RequestError("Email and OTP are required", 400));
-      return;
-    }
+
     const cachedOtp = await redisClient.get(`otp:${email}`);
     if (!cachedOtp || cachedOtp !== otp) {
       next(new RequestError("Invalid or expired OTP", 400));
