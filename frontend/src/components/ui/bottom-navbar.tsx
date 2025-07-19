@@ -36,9 +36,9 @@ export function BottomNavbar() {
       <div className="flex justify-around items-center">
         <NavItem to="/" icon={<AiOutlineHome />} label="Home" />
         <NavItem
-          to="/categories"
+          to="/activities"
           icon={<MdOutlineCategory />}
-          label="Categories"
+          label="Activities"
         />
         <NavItem
           to="/timesheets"

@@ -2,7 +2,7 @@ import { Route, Routes } from "react-router";
 import ProtectedRoute from "./components/ProdectedRoute";
 import type { AuthUser } from "./types/types";
 import Home from "./pages/tabs/home";
-import Categories from "./pages/tabs/categories";
+import Activities from "./pages/tabs/activities";
 import Timesheets from "./pages/tabs/timesheets";
 import Analytics from "./pages/tabs/analytics";
 import NotFound from "./pages/not-found";
@@ -25,7 +25,7 @@ function App() {
     <Routes>
       <Route path="/" element={<ProtectedRoute user={user} />}>
         <Route index element={<Home />} />
-        <Route path="categories" element={<Categories />} />
+        <Route path="activities" element={<Activities />} />
         <Route path="timesheets" element={<Timesheets />} />
         <Route path="analytics" element={<Analytics />} />
         <Route path="profile" element={<Profile />} />
