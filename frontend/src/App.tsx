@@ -1,6 +1,5 @@
 import { Route, Routes } from "react-router";
 import ProtectedRoute from "./components/ProdectedRoute";
-import type { AuthUser } from "./types/types";
 import Home from "./pages/tabs/home";
 import Activities from "./pages/tabs/activities";
 import Timesheets from "./pages/tabs/timesheets";
@@ -9,17 +8,20 @@ import NotFound from "./pages/not-found";
 import SignIn from "./pages/auth/sign-in";
 import CreateProfile from "./pages/auth/create-profile";
 import Profile from "./pages/tabs/profile";
-
-const fakeUser: AuthUser = {
-  id: "1",
-  email: "email@gmail.com",
-  firstName: "John",
-  lastName: "Doe",
-  avatar: "https://example.com/avatar.jpg",
-};
+import { useAuthContext } from "./hooks/useAuthContext";
+import { Loading } from "./components/ui/loading";
+import AuthRoute from "./components/AuthRoute";
 
 function App() {
-  const user: AuthUser = fakeUser;
+  const { user, isLoading } = useAuthContext();
+
+  if (isLoading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <Loading />
+      </div>
+    );
+  }
 
   return (
     <Routes>
@@ -30,8 +32,11 @@ function App() {
         <Route path="analytics" element={<Analytics />} />
         <Route path="profile" element={<Profile />} />
       </Route>
-      <Route path="/auth/sign-in" element={<SignIn />} />
-      <Route path="/auth/create-profile" element={<CreateProfile />} />
+
+      <Route path="/auth/" element={<AuthRoute user={user} />}>
+        <Route path="sign-in" element={<SignIn />} />
+        <Route path="create-profile" element={<CreateProfile />} />
+      </Route>
       <Route path="*" element={<NotFound />} />
     </Routes>
   );

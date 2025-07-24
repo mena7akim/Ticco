@@ -4,11 +4,37 @@ export type AuthUser = {
   firstName: string;
   lastName: string;
   avatar: string;
-} | null;
+};
 
-export type ProtectedRouteProps = {
+export type RouteProps = {
   user: AuthUser | null;
   redirectPath?: string;
+};
+
+// Authentication types
+export type LoginRequest = {
+  email: string;
+  otp: string;
+};
+
+export type RequestLoginRequest = {
+  email: string;
+};
+
+export type AuthResponse = {
+  result: {
+    data: {
+      access_token: string;
+      user: AuthUser;
+    };
+    message: string;
+  };
+};
+
+export type CreateProfileRequest = {
+  firstName: string;
+  lastName: string;
+  avatar?: string;
 };
 
 export type Activity = {
