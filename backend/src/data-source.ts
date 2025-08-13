@@ -2,6 +2,7 @@ import { DataSource } from "typeorm";
 import { User } from "./models/user";
 import { Activity } from "./models/activity";
 import "./env";
+import { Timesheet } from "./models/timesheet";
 
 export const AppDataSource = new DataSource({
   type: "mysql",
@@ -12,7 +13,7 @@ export const AppDataSource = new DataSource({
   database: process.env.DB_NAME,
   synchronize: process.env.DB_SYNCHRONIZE === "true",
   logging: process.env.DB_LOGGING === "true",
-  entities: [User, Activity],
+  entities: [User, Activity, Timesheet],
   subscribers: [],
   migrations: [],
 });
