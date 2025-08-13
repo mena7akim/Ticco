@@ -1,6 +1,5 @@
 import { NextFunction, Request, RequestHandler, Response } from "express";
 import ActivityRepository from "../../repository/activityRepository";
-import UserActivityRepository from "../../repository/userActivityRepository";
 import {
   asyncHandler,
   RequestError,
@@ -11,6 +10,7 @@ import { SuccessResponse } from "../../utils/responses/responses";
 const getGlobalActivities: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const globalActivities = await ActivityRepository.find({
+      where: { userId: 0 }, // Assuming global activities have userId 0
       order: { createdAt: "ASC" },
     });
 
@@ -30,7 +30,7 @@ const getUserActivities: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.id;
 
-    const userActivities = await UserActivityRepository.find({
+    const userActivities = await ActivityRepository.find({
       where: { userId },
       order: { createdAt: "ASC" },
     });
@@ -53,9 +53,10 @@ const getAllActivities: RequestHandler = asyncHandler(
 
     const [globalActivities, userActivities] = await Promise.all([
       ActivityRepository.find({
+        where: { userId: 0 }, // Assuming global activities have userId 0
         order: { createdAt: "ASC" },
       }),
-      UserActivityRepository.find({
+      ActivityRepository.find({
         where: { userId },
         order: { createdAt: "ASC" },
       }),
@@ -81,7 +82,7 @@ const createUserActivity: RequestHandler = asyncHandler(
     const { name, color, icon } = req.body;
     const userId = req.user.id;
 
-    const userActivity = await UserActivityRepository.save({
+    const userActivity = await ActivityRepository.save({
       userId,
       name,
       color,
@@ -106,7 +107,7 @@ const updateUserActivity: RequestHandler = asyncHandler(
     const { name, color, icon } = req.body;
     const userId = req.user.id;
 
-    const userActivity = await UserActivityRepository.findOne({
+    const userActivity = await ActivityRepository.findOne({
       where: { id: parseInt(id), userId },
     });
 
@@ -119,7 +120,7 @@ const updateUserActivity: RequestHandler = asyncHandler(
     userActivity.color = color;
     userActivity.icon = icon;
 
-    const updatedActivity = await UserActivityRepository.save(userActivity);
+    const updatedActivity = await ActivityRepository.save(userActivity);
 
     return SuccessResponse(
       res,
@@ -138,7 +139,7 @@ const deleteUserActivity: RequestHandler = asyncHandler(
     const { id } = req.params;
     const userId = req.user.id;
 
-    const userActivity = await UserActivityRepository.findOne({
+    const userActivity = await ActivityRepository.findOne({
       where: { id: parseInt(id), userId },
     });
 
@@ -147,7 +148,7 @@ const deleteUserActivity: RequestHandler = asyncHandler(
       return;
     }
 
-    await UserActivityRepository.remove(userActivity);
+    await ActivityRepository.remove(userActivity);
 
     return SuccessResponse(
       res,
