@@ -12,6 +12,10 @@ export const asyncHandler = (fn: Function) => {
   return (req: Request, res: Response, next: NextFunction) => {
     fn(req, res, next).catch((error: Error) => {
       console.error(error);
+      if (error instanceof RequestError) {
+        next(error);
+        return;
+      }
       res.status(500).json({
         status: "FAILED",
         result: {

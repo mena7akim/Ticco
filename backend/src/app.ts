@@ -9,6 +9,7 @@ import morgan from "morgan";
 import cors from "cors";
 import profileRouter from "./modules/profile/controller";
 import activityRouter from "./modules/activity/controller";
+import timesheetRouter from "./modules/timesheet/controller";
 import { DataSource } from "typeorm";
 import { RedisClientType } from "redis";
 
@@ -52,6 +53,7 @@ export const bootstrap = async (
       app.use("/api/auth", authRouter);
       app.use("/api/profile", profileRouter);
       app.use("/api/activities", activityRouter);
+      app.use("/api/timesheets", timesheetRouter);
 
       app.use(globalErrorHandling);
     })
