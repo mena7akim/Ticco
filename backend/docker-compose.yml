@@ -13,7 +13,7 @@ services:
       - DB_NAME=ticksy-test
       - JWT_SECRET=FaaRHalqyd9mQ+Fie3AhqrigJub3OJimeXrIpPR0LE0=
       - JWT_EXPIRATION=1d
-      - CORS_ORIGIN=*
+      - CORS_ORIGIN=http://localhost:5173
       - DB_SYNCHRONIZE=true
       - DB_LOGGING=true
       - SMTP_USER=mena7akim@gmail.com

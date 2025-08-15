@@ -68,3 +68,37 @@ export type CreateActivityRequest = {
 };
 
 export type UpdateActivityRequest = CreateActivityRequest;
+
+// Timesheet types
+export type Timesheet = {
+  id: number;
+  startTime: string;
+  endTime: string | null;
+  activityId: number;
+  userId: number;
+  activity: Activity | UserActivity;
+  createdAt: string;
+  updatedAt: string;
+  durationMinutes?: number;
+};
+
+export type StartTimesheetRequest = {
+  activityId: number;
+  startTime: string;
+};
+
+export type StopTimesheetRequest = {
+  endTime: string;
+};
+
+export type TimesheetsResponse = {
+  timesheets: Timesheet[];
+  pagination: {
+    page: number;
+    limit: number;
+    total: number;
+    totalPages: number;
+    hasNext: boolean;
+    hasPrev: boolean;
+  };
+};
