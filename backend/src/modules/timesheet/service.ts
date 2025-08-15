@@ -15,17 +15,15 @@ import {
 } from "typeorm";
 import { getTimesheetSocketService } from "../../utils/sockets/timesheetSocket";
 
-// Start a timesheet for an activity
 const startTimesheet: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.id;
     const { activityId, startTime } = req.body;
 
-    // Check if the activity exists and is accessible to the user
     const activity = await ActivityRepository.findOne({
       where: [
-        { id: activityId, userId: 0 }, // Global activity
-        { id: activityId, userId }, // User's custom activity
+        { id: activityId, userId: 0 },
+        { id: activityId, userId },
       ],
     });
 
@@ -33,7 +31,6 @@ const startTimesheet: RequestHandler = asyncHandler(
       throw new RequestError("Activity not found or not accessible", 404);
     }
 
-    // Create new timesheet - database constraint will prevent duplicates
     const timesheet = TimesheetRepository.create({
       userId,
       activityId,
@@ -44,16 +41,14 @@ const startTimesheet: RequestHandler = asyncHandler(
     try {
       const savedTimesheet = await TimesheetRepository.save(timesheet);
 
-      // Fetch the complete timesheet with activity details
       const completeTimesheet = await TimesheetRepository.findOne({
         where: { id: savedTimesheet.id },
         relations: ["activity"],
       });
 
-      // Emit socket event for real-time sync across devices
       const socketService = getTimesheetSocketService();
       if (socketService) {
-        socketService.notifyTimesheetStarted(userId, completeTimesheet);
+        socketService.sync();
       }
 
       return SuccessResponse(
@@ -65,7 +60,6 @@ const startTimesheet: RequestHandler = asyncHandler(
         201
       );
     } catch (error: any) {
-      // Handle database constraint violation (duplicate running timesheet)
       if (error.code === "ER_DUP_ENTRY" || error.code === "23505") {
         throw new RequestError(
           "You already have a running timesheet. Please stop it before starting a new one.",
@@ -77,13 +71,11 @@ const startTimesheet: RequestHandler = asyncHandler(
   }
 );
 
-// Stop the running timesheet
 const stopTimesheet: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.id;
     const { endTime } = req.body;
 
-    // Find the running timesheet
     const runningTimesheet = await TimesheetRepository.findOne({
       where: {
         userId,
@@ -96,17 +88,14 @@ const stopTimesheet: RequestHandler = asyncHandler(
       throw new RequestError("No running timesheet found", 404);
     }
 
-    // Validate that endTime is after startTime
     const endDateTime = new Date(endTime);
     if (endDateTime <= runningTimesheet.startTime) {
       throw new RequestError("End time must be after start time", 400);
     }
 
-    // Update the timesheet with end time
     runningTimesheet.endTime = endDateTime;
     const updatedTimesheet = await TimesheetRepository.save(runningTimesheet);
 
-    // Calculate duration in minutes
     const durationMs =
       endDateTime.getTime() - runningTimesheet.startTime.getTime();
     const durationMinutes = Math.round(durationMs / (1000 * 60));
@@ -116,10 +105,9 @@ const stopTimesheet: RequestHandler = asyncHandler(
       durationMinutes,
     };
 
-    // Emit socket event for real-time sync across devices
     const socketService = getTimesheetSocketService();
     if (socketService) {
-      socketService.notifyTimesheetStopped(userId, responseData);
+      socketService.sync();
     }
 
     return SuccessResponse(
@@ -133,7 +121,6 @@ const stopTimesheet: RequestHandler = asyncHandler(
   }
 );
 
-// Get current running timesheet
 const getCurrentTimesheet: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.id;
@@ -157,18 +144,11 @@ const getCurrentTimesheet: RequestHandler = asyncHandler(
       );
     }
 
-    // Calculate current duration in minutes
-    const currentTime = new Date();
-    const durationMs =
-      currentTime.getTime() - runningTimesheet.startTime.getTime();
-    const durationMinutes = Math.round(durationMs / (1000 * 60));
-
     return SuccessResponse(
       res,
       {
         data: {
           ...runningTimesheet,
-          durationMinutes,
         },
         message: "Current timesheet retrieved successfully",
       },
@@ -177,23 +157,20 @@ const getCurrentTimesheet: RequestHandler = asyncHandler(
   }
 );
 
-// Get user's timesheets with pagination and filtering
 const getUserTimesheets: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.id;
     const { page = 1, limit = 10, startDate, endDate, activityId } = req.query;
 
-    // Build where conditions
     const whereConditions: any = {
       userId,
-      endTime: Not(IsNull()), // Only completed timesheets
+      endTime: Not(IsNull()),
     };
 
     if (activityId) {
       whereConditions.activityId = parseInt(activityId as string);
     }
 
-    // Handle date filtering
     if (startDate && endDate) {
       whereConditions.startTime = Between(
         new Date(startDate as string),
@@ -207,10 +184,8 @@ const getUserTimesheets: RequestHandler = asyncHandler(
       whereConditions.startTime = LessThanOrEqual(new Date(endDate as string));
     }
 
-    // Calculate pagination
     const skip = ((page as number) - 1) * (limit as number);
 
-    // Get timesheets with total count
     const [timesheets, total] = await TimesheetRepository.findAndCount({
       where: whereConditions,
       relations: ["activity"],
@@ -219,27 +194,13 @@ const getUserTimesheets: RequestHandler = asyncHandler(
       take: limit as number,
     });
 
-    // Calculate duration for each timesheet
-    const timesheetsWithDuration = timesheets.map((timesheet) => {
-      if (timesheet.endTime) {
-        const durationMs =
-          timesheet.endTime.getTime() - timesheet.startTime.getTime();
-        const durationMinutes = Math.round(durationMs / (1000 * 60));
-        return {
-          ...timesheet,
-          durationMinutes,
-        };
-      }
-      return timesheet;
-    });
-
     const totalPages = Math.ceil(total / (limit as number));
 
     return SuccessResponse(
       res,
       {
         data: {
-          timesheets: timesheetsWithDuration,
+          timesheets: timesheets,
           pagination: {
             page: page as number,
             limit: limit as number,
@@ -256,7 +217,6 @@ const getUserTimesheets: RequestHandler = asyncHandler(
   }
 );
 
-// Get a specific timesheet by ID
 const getTimesheetById: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.id;
@@ -274,25 +234,11 @@ const getTimesheetById: RequestHandler = asyncHandler(
       throw new RequestError("Timesheet not found", 404);
     }
 
-    // Calculate duration if timesheet is completed
-    let durationMinutes = null;
-    if (timesheet.endTime) {
-      const durationMs =
-        timesheet.endTime.getTime() - timesheet.startTime.getTime();
-      durationMinutes = Math.round(durationMs / (1000 * 60));
-    } else {
-      // Calculate current duration for running timesheet
-      const currentTime = new Date();
-      const durationMs = currentTime.getTime() - timesheet.startTime.getTime();
-      durationMinutes = Math.round(durationMs / (1000 * 60));
-    }
-
     return SuccessResponse(
       res,
       {
         data: {
           ...timesheet,
-          durationMinutes,
         },
         message: "Timesheet retrieved successfully",
       },
@@ -301,7 +247,6 @@ const getTimesheetById: RequestHandler = asyncHandler(
   }
 );
 
-// Delete a timesheet (only if it's stopped)
 const deleteTimesheet: RequestHandler = asyncHandler(
   async (req: Request, res: Response, next: NextFunction): Promise<void> => {
     const userId = req.user.id;
@@ -328,10 +273,9 @@ const deleteTimesheet: RequestHandler = asyncHandler(
 
     await TimesheetRepository.remove(timesheet);
 
-    // Emit socket event for real-time sync across devices
     const socketService = getTimesheetSocketService();
     if (socketService) {
-      socketService.notifyTimesheetDeleted(userId, timesheet.id);
+      socketService.sync();
     }
 
     return SuccessResponse(

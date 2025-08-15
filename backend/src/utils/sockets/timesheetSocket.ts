@@ -12,7 +12,6 @@ interface AuthenticatedSocket extends Socket {
 
 export class TimesheetSocketService {
   private io: SocketIOServer;
-  private userSockets: Map<number, Set<string>> = new Map(); // userId -> Set of socketIds
 
   constructor(httpServer: HTTPServer) {
     this.io = new SocketIOServer(httpServer, {
@@ -68,27 +67,8 @@ export class TimesheetSocketService {
 
       console.log(`User ${userId} connected with socket ${socket.id}`);
 
-      // Track user's socket connections
-      if (!this.userSockets.has(userId)) {
-        this.userSockets.set(userId, new Set());
-      }
-      this.userSockets.get(userId)!.add(socket.id);
-
-      // Join user to their personal room for targeted messaging
       socket.join(`user_${userId}`);
-
-      // Send current timesheet status on connection
       this.sendCurrentTimesheetStatus(userId);
-
-      // Handle timesheet events
-      socket.on("timesheet:start", (data) => {
-        this.handleTimesheetStart(userId, data);
-      });
-
-      socket.on("timesheet:stop", (data) => {
-        this.handleTimesheetStop(userId, data);
-      });
-
       socket.on("timesheet:sync", () => {
         this.sendCurrentTimesheetStatus(userId);
       });
@@ -96,14 +76,6 @@ export class TimesheetSocketService {
       // Handle disconnection
       socket.on("disconnect", () => {
         console.log(`User ${userId} disconnected socket ${socket.id}`);
-
-        const userSocketSet = this.userSockets.get(userId);
-        if (userSocketSet) {
-          userSocketSet.delete(socket.id);
-          if (userSocketSet.size === 0) {
-            this.userSockets.delete(userId);
-          }
-        }
       });
     });
   }
@@ -121,76 +93,21 @@ export class TimesheetSocketService {
 
       let data = null;
       if (runningTimesheet) {
-        // Calculate current duration
-        const currentTime = new Date();
-        const durationMs =
-          currentTime.getTime() - runningTimesheet.startTime.getTime();
-        const durationMinutes = Math.round(durationMs / (1000 * 60));
-
         data = {
           ...runningTimesheet,
-          durationMinutes,
         };
       }
 
-      this.io.to(`user_${userId}`).emit("timesheet:status", {
-        runningTimesheet: data,
-        timestamp: new Date().toISOString(),
-      });
+      this.io
+        .to(`user_${userId}`)
+        .emit("timesheet:status", { timesheet: data });
     } catch (error) {
       console.error("Error sending timesheet status:", error);
     }
   }
 
-  // Handle timesheet start event
-  private async handleTimesheetStart(userId: number, data: any) {
-    // Emit to all user's devices that timesheet has started
-    this.io.to(`user_${userId}`).emit("timesheet:started", {
-      timesheet: data,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  // Handle timesheet stop event
-  private async handleTimesheetStop(userId: number, data: any) {
-    // Emit to all user's devices that timesheet has stopped
-    this.io.to(`user_${userId}`).emit("timesheet:stopped", {
-      timesheet: data,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  // Public methods for service layer to emit events
-  public notifyTimesheetStarted(userId: number, timesheet: any) {
-    this.io.to(`user_${userId}`).emit("timesheet:started", {
-      timesheet,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  public notifyTimesheetStopped(userId: number, timesheet: any) {
-    this.io.to(`user_${userId}`).emit("timesheet:stopped", {
-      timesheet,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  public notifyTimesheetDeleted(userId: number, timesheetId: number) {
-    this.io.to(`user_${userId}`).emit("timesheet:deleted", {
-      timesheetId,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  // Start periodic sync for all connected users
-  public startPeriodicSync() {
-    setInterval(() => {
-      this.userSockets.forEach((socketIds, userId) => {
-        if (socketIds.size > 0) {
-          this.sendCurrentTimesheetStatus(userId);
-        }
-      });
-    }, 30000); // Sync every 30 seconds
+  public sync() {
+    this.io.emit("timesheet:sync");
   }
 
   public getIO() {
