@@ -22,6 +22,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { useRequestLogin, useLogin } from "@/hooks/useAuth";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSeparator,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
+import { REGEXP_ONLY_DIGITS_AND_CHARS } from "input-otp";
 
 // Form schemas
 const emailSchema = z.object({
@@ -164,13 +171,22 @@ export default function SignIn() {
                       <FormItem>
                         <FormLabel>Verification Code</FormLabel>
                         <FormControl>
-                          <Input
-                            placeholder="Enter 6-digit code"
-                            className="text-center text-lg tracking-widest"
+                          <InputOTP
                             maxLength={6}
-                            disabled={loginMutation.isPending}
+                            pattern={REGEXP_ONLY_DIGITS_AND_CHARS}
                             {...field}
-                          />
+                            className="w-full"
+                            containerClassName="justify-center"
+                          >
+                            <InputOTPGroup>
+                              <InputOTPSlot index={0} />
+                              <InputOTPSlot index={1} />
+                              <InputOTPSlot index={2} />
+                              <InputOTPSlot index={3} />
+                              <InputOTPSlot index={4} />
+                              <InputOTPSlot index={5} />
+                            </InputOTPGroup>
+                          </InputOTP>
                         </FormControl>
                         <FormMessage />
                       </FormItem>
