@@ -5,22 +5,8 @@ services:
       dockerfile: Dockerfile
     ports:
       - "8000:8000"
-    environment:
-      - DB_HOST=db
-      - DB_PORT=3306
-      - DB_USERNAME=mysql
-      - DB_PASSWORD=1234
-      - DB_NAME=ticksy-test
-      - JWT_SECRET=FaaRHalqyd9mQ+Fie3AhqrigJub3OJimeXrIpPR0LE0=
-      - JWT_EXPIRATION=1d
-      - CORS_ORIGIN=http://localhost:5173
-      - DB_SYNCHRONIZE=true
-      - DB_LOGGING=true
-      - SMTP_USER=mena7akim@gmail.com
-      - SMTP_PASS=dvvoljoifqctebbx
-      - REDIS_HOST=redis
-      - REDIS_PORT=6379
-      - REDIS_PASSWORD=redis-password
+    env_file:
+      - .env
     depends_on:
       - db
 

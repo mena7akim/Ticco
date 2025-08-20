@@ -3,11 +3,11 @@ import "../../env";
 import log from "../logger/logger";
 
 const sendEmail = async (to: string, subject: string, content: string) => {
-  console.log("sending email to ", to);
+  log.info("sending email to ", to);
   const transporter = createTransport({
-    service: "gmail",
-    host: "stmp.gmail.com",
-    port: 587,
+    service: process.env.NODE_ENV === "development" ? "gmail" : undefined,
+    host: process.env.SMTP_HOST,
+    port: parseInt(process.env.SMTP_PORT as string, 10),
     secure: true,
     auth: {
       user: process.env.SMTP_USER,
@@ -16,20 +16,13 @@ const sendEmail = async (to: string, subject: string, content: string) => {
   });
 
   const mailOptions = {
-    from: `Ticksy <${process.env.SMTP_USER}>`,
+    from: `Ticco <${process.env.SMTP_USER}>`,
     to,
     subject,
     html: content,
   };
-  log.info(
-    "Email",
-    `Sending email to ${to} with subject "${subject}" with content "${content}"`
-  );
   await transporter.sendMail(mailOptions);
-  log.info(
-    "Email",
-    `Email sent to ${to} with subject "${subject}" with content "${content}"`
-  );
+  log.info("email sent successfully to ", to);
 };
 
 export default sendEmail;
