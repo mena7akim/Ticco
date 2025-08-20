@@ -101,7 +101,7 @@ function Activities() {
   }
 
   return (
-    <div className="container mx-auto p-6 space-y-8">
+    <div className="container max-w-4xl mx-auto">
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold text-foreground">Activities</h1>

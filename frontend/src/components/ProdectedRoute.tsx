@@ -17,8 +17,10 @@ function ProtectedRoute({ user, redirectPath = "/auth/sign-in" }: RouteProps) {
   }
 
   return (
-    <div className="pb-16">
-      <Outlet />
+    <div className="flex flex-col h-screen">
+      <div className="overflow-y-auto flex-1 pt-8 px-5 w-full">
+        <Outlet />
+      </div>
       <BottomNavbar />
     </div>
   );

@@ -32,7 +32,7 @@ const NavItem = ({ to, icon, label }: NavItemProps) => {
 
 export function BottomNavbar() {
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-background border-t border-border shadow-md px-2 py-1">
+    <div className="bottom-0 left-0 right-0 bg-background border-t border-border shadow-md px-2 py-1 sticky z-50">
       <div className="flex justify-around items-center">
         <NavItem to="/" icon={<AiOutlineHome />} label="Home" />
         <NavItem
