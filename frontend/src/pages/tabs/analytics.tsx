@@ -1,7 +1,7 @@
-import React from "react";
+import NotImplemented from "@/components/NotImplemented";
 
 function Analytics() {
-  return <div>Analytics</div>;
+  return <NotImplemented />;
 }
 
 export default Analytics;

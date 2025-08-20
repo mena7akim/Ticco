@@ -53,24 +53,9 @@ function Timesheets() {
   };
 
   return (
-    <div className="container mx-auto max-w-4xl py-6 px-4">
+    <div className="container max-w-4xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-2xl font-bold">Your Timesheets</h1>
-
-        <Badge
-          variant={isConnected ? "default" : "destructive"}
-          className="flex items-center gap-1"
-        >
-          {isConnected ? (
-            <>
-              <Wifi className="h-3 w-3" /> Connected
-            </>
-          ) : (
-            <>
-              <WifiOff className="h-3 w-3" /> Offline
-            </>
-          )}
-        </Badge>
       </div>
 
       {/* Filters */}

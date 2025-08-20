@@ -66,7 +66,7 @@ function Home() {
   const isTimerRunning = !!currentTimesheet && !currentTimesheet.endTime;
 
   return (
-    <div className="flex flex-col items-center justify-center h-[calc(100vh-8rem)]">
+    <div className="flex flex-col items-center justify-center h-full">
       <Card className="w-full max-w-md mx-auto">
         <CardContent className="pt-6">
           <div className="text-center mb-6">
@@ -129,6 +129,8 @@ function Home() {
             <p className="text-muted-foreground mt-4">
               {isTimerRunning
                 ? "Click to stop the timer"
+                : selectedActivityId
+                ? "Click to start tracking"
                 : "Select an activity and click to start tracking"}
             </p>
           </div>

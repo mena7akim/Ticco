@@ -87,61 +87,64 @@ export function TimesheetFilters({ onFilterChange }: TimesheetFiltersProps) {
           />
         </div>
 
-        {/* Start Date */}
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">From</p>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "justify-start text-left font-normal",
-                  !startDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {startDate ? format(startDate, "PP") : "Pick date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={startDate}
-                onSelect={(date) => handleDateChange(date, "start")}
-                initialFocus
-                disabled={(date) => (endDate ? date > endDate : false)}
-              />
-            </PopoverContent>
-          </Popover>
-        </div>
+        {/* Date Range */}
+        <div className="flex flex-row gap-2 justify-between items-center">
+          <div className="flex-1">
+            <p className="text-sm text-muted-foreground mb-1">From</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal w-full",
+                    !startDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {startDate ? format(startDate, "PP") : "Pick date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={startDate}
+                  onSelect={(date) => handleDateChange(date, "start")}
+                  initialFocus
+                  disabled={(date) => (endDate ? date > endDate : false)}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
 
-        {/* End Date */}
-        <div>
-          <p className="text-sm text-muted-foreground mb-1">To</p>
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "justify-start text-left font-normal",
-                  !endDate && "text-muted-foreground"
-                )}
-              >
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {endDate ? format(endDate, "PP") : "Pick date"}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={endDate}
-                onSelect={(date) => handleDateChange(date, "end")}
-                initialFocus
-                disabled={(date) => (startDate ? date < startDate : false)}
-              />
-            </PopoverContent>
-          </Popover>
+          {/* End Date */}
+          <div className="flex-1">
+            <p className="text-sm text-muted-foreground mb-1">To</p>
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button
+                  variant="outline"
+                  className={cn(
+                    "justify-start text-left font-normal w-full",
+                    !endDate && "text-muted-foreground"
+                  )}
+                >
+                  <CalendarIcon className="mr-2 h-4 w-4" />
+                  {endDate ? format(endDate, "PP") : "Pick date"}
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-auto p-0">
+                <Calendar
+                  mode="single"
+                  selected={endDate}
+                  onSelect={(date) => handleDateChange(date, "end")}
+                  initialFocus
+                  disabled={(date) => (startDate ? date < startDate : false)}
+                />
+              </PopoverContent>
+            </Popover>
+          </div>
         </div>
+        {/* Start Date */}
       </div>
 
       {/* Clear Filters Button */}
